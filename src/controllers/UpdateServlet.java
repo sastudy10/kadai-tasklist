@@ -12,17 +12,18 @@ import javax.servlet.http.HttpServletResponse;
 
 import models.Task;
 import utils.DBUtil;
+
 /**
- * Servlet implementation class CreateServlet
+ * Servlet implementation class UpdateServlet
  */
-@WebServlet({ "/CreateServlet", "/create" })
-public class CreateServlet extends HttpServlet {
+@WebServlet("/update")
+public class UpdateServlet extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public CreateServlet() {
+    public UpdateServlet() {
         super();
         // TODO Auto-generated constructor stub
     }
@@ -35,20 +36,20 @@ public class CreateServlet extends HttpServlet {
         if(_token != null && _token.equals(request.getSession().getId())) {
             EntityManager em = DBUtil.createEntityManager();
 
-            Task m = new Task();
+            Task m = em.find(Task.class, (Integer)(request.getSession().getAttribute("task_id")));
+
 
             String content = request.getParameter("content");
             m.setContent(content);
 
             Timestamp currentTime = new Timestamp(System.currentTimeMillis());
-            m.setCreated_at(currentTime);
             m.setUpdated_at(currentTime);
 
             em.getTransaction().begin();
-            em.persist(m);
             em.getTransaction().commit();
-            request.getSession().setAttribute("flush", "登録が完了しました。");
             em.close();
+
+            request.getSession().removeAttribute("task_id");
 
             response.sendRedirect(request.getContextPath() + "/index");
         }
